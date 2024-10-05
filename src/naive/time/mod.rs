@@ -239,6 +239,25 @@ impl arbitrary::Arbitrary<'_> for NaiveTime {
     }
 }
 
+#[cfg(feature = "arbitrary")]
+impl proptest::arbitrary::Arbitrary for chrono::NaiveTime {
+    type Parameters = ();
+    type Strategy = proptest::strategy::BoxedStrategy<chrono::NaiveTime>;
+
+    fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
+        (0..=1439, 0..=60, 0..=999_999_999)
+            .prop_map(|(mins, mut secs, mut nano)| {
+                if secs == 60 {
+                    secs = 59;
+                    nano += 1_000_000_000;
+                }
+                chrono::NaiveTime::from_num_seconds_from_midnight_opt(mins * 60 + secs, nano)
+                    .expect("Could not generate a valid chrono::NaiveTime. It looks like implementation of Arbitrary for NaiveTime is erroneous.")
+            })
+            .boxed()
+    }
+}
+
 impl NaiveTime {
     /// Makes a new `NaiveTime` from hour, minute and second.
     ///

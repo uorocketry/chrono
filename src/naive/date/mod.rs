@@ -121,6 +121,22 @@ impl arbitrary::Arbitrary<'_> for NaiveDate {
     }
 }
 
+#[cfg(all(feature = "arbitrary", feature = "std"))]
+impl proptest::arbitrary::Arbitrary for NaiveDate {
+    type Parameters = ();
+    type Strategy = proptest::strategy::BoxedStrategy<NaiveDate>;
+
+    fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
+        (chrono::MIN_YEAR..=chrono::MAX_YEAR)
+            .prop_flat_map(|year| {
+                let max_days = chrono::YearFlags::from_year(year).ndays();
+                (proptest::strategy::Just(year), 1..=max_days)
+            })
+            .prop_map(|(year, ord)| NaiveDate::from_yo(year, ord))
+            .boxed()
+    }
+}
+
 impl NaiveDate {
     pub(crate) fn weeks_from(&self, day: Weekday) -> i32 {
         (self.ordinal() as i32 - self.weekday().days_since(day) as i32 + 6) / 7
