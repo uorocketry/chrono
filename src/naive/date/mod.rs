@@ -99,7 +99,6 @@ mod tests;
     archive_attr(derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash))
 )]
 #[cfg_attr(feature = "rkyv-validation", archive(check_bytes))]
-#[cfg_attr(all(feature = "arbitrary", feature = "std"), derive(proptest_derive::Arbitrary))]
 pub struct NaiveDate {
     yof: NonZeroI32, // (year << 13) | of
 }
@@ -127,12 +126,14 @@ impl proptest::arbitrary::Arbitrary for NaiveDate {
     type Strategy = proptest::strategy::BoxedStrategy<NaiveDate>;
 
     fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
-        (chrono::MIN_YEAR..=chrono::MAX_YEAR)
+        use proptest::strategy::{Just, Strategy};
+
+        (MIN_YEAR..=MAX_YEAR)
             .prop_flat_map(|year| {
-                let max_days = chrono::YearFlags::from_year(year).ndays();
-                (proptest::strategy::Just(year), 1..=max_days)
+                let max_days = YearFlags::from_year(year).ndays();
+                (Just(year), 1..=max_days)
             })
-            .prop_map(|(year, ord)| NaiveDate::from_yo(year, ord))
+            .prop_map(|(year, ord)| NaiveDate::from_yo_opt(year, ord).unwrap())
             .boxed()
     }
 }

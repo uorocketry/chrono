@@ -217,7 +217,6 @@ mod tests;
     archive_attr(derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash))
 )]
 #[cfg_attr(feature = "rkyv-validation", archive(check_bytes))]
-#[cfg_attr(all(feature = "arbitrary", feature = "std"), derive(proptest_derive::Arbitrary))]
 pub struct NaiveTime {
     secs: u32,
     frac: u32,
@@ -240,19 +239,21 @@ impl arbitrary::Arbitrary<'_> for NaiveTime {
 }
 
 #[cfg(feature = "arbitrary")]
-impl proptest::arbitrary::Arbitrary for chrono::NaiveTime {
+impl proptest::arbitrary::Arbitrary for NaiveTime {
     type Parameters = ();
-    type Strategy = proptest::strategy::BoxedStrategy<chrono::NaiveTime>;
+    type Strategy = proptest::strategy::BoxedStrategy<NaiveTime>;
 
     fn arbitrary_with(_: Self::Parameters) -> Self::Strategy {
-        (0..=1439, 0..=60, 0..=999_999_999)
+        use proptest::strategy::{Strategy, Just};
+
+        (0..=1439i32, 0..=60i32, 0..=999_999_999u32)
             .prop_map(|(mins, mut secs, mut nano)| {
                 if secs == 60 {
                     secs = 59;
                     nano += 1_000_000_000;
                 }
-                chrono::NaiveTime::from_num_seconds_from_midnight_opt(mins * 60 + secs, nano)
-                    .expect("Could not generate a valid chrono::NaiveTime. It looks like implementation of Arbitrary for NaiveTime is erroneous.")
+                NaiveTime::from_num_seconds_from_midnight_opt((mins * 60 + secs) as u32, nano)
+                    .expect("Could not generate a valid NaiveTime. It looks like implementation of Arbitrary for NaiveTime is erroneous.")
             })
             .boxed()
     }
