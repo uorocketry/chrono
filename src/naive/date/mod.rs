@@ -99,6 +99,7 @@ mod tests;
     archive_attr(derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash))
 )]
 #[cfg_attr(feature = "rkyv-validation", archive(check_bytes))]
+#[cfg_attr(all(feature = "arbitrary", feature = "std"), derive(proptest_derive::Arbitrary))]
 pub struct NaiveDate {
     yof: NonZeroI32, // (year << 13) | of
 }
