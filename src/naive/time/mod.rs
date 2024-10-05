@@ -238,7 +238,7 @@ impl arbitrary::Arbitrary<'_> for NaiveTime {
     }
 }
 
-#[cfg(all(feature = "arbitrary", test))]
+#[cfg(all(feature = "arbitrary", feature = "std"))]
 impl proptest::arbitrary::Arbitrary for NaiveTime {
     type Parameters = ();
     type Strategy = proptest::strategy::BoxedStrategy<NaiveTime>;

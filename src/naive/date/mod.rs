@@ -120,7 +120,7 @@ impl arbitrary::Arbitrary<'_> for NaiveDate {
     }
 }
 
-#[cfg(all(feature = "arbitrary", test))]
+#[cfg(all(feature = "arbitrary", feature = "std"))]
 impl proptest::arbitrary::Arbitrary for NaiveDate {
     type Parameters = ();
     type Strategy = proptest::strategy::BoxedStrategy<NaiveDate>;
