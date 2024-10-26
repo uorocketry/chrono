@@ -64,6 +64,8 @@ iana-time-zone = { version = "0.1.45", optional = true, features = ["fallback"] 
 android-tzdata = { version = "0.1.1", optional = true }
 
 [dev-dependencies]
+proptest = "1.2.0"
+proptest-derive = "0.3.0"
 serde_json = { version = "1" }
 serde_derive = { version = "1", default-features = false }
 bincode = { version = "1.3.0" }
